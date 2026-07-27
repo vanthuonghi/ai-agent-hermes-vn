@@ -1,0 +1,34 @@
+[
+  {
+    "slug": "hermes-tong-hop-bao-cao",
+    "cat": "Thực chiến",
+    "img": "tu-dong-hoa-sme.png",
+    "title": "Hermes tổng hợp báo cáo: chủ DN đọc 1 dòng biết tuần làm ăn sao",
+    "ex": "Thay vì lật từng file Excel, chủ DN giao Hermes tổng hợp doanh thu, chi phí thành 1 báo cáo sáng.",
+    "intro": "Chủ tiệm uống cà phê sáng nào cũng lo không biết tuần qua lãi lỗ thế nào. Hermes thay đổi điều đó."
+  },
+  {
+    "slug": "hermes-cham-soc-khach-zalo",
+    "cat": "Thực chiến",
+    "img": "hermes-tu-dong-hoa-cskh-spa.png",
+    "title": "Hermes chăm sóc khách Zalo: không sót tin nhắn, không mất khách",
+    "ex": "Chủ clinic giao Hermes trả tin nhắn Zalo ngoài giờ. Khách không bỏ ngỏ, tỷ lệ chốt tăng.",
+    "intro": "Một chủ phòng khám da liễu nhận 50 tin nhắn/ngày, bận là quên. Cô ấy để Hermes lo phần đầu."
+  },
+  {
+    "slug": "hermes-len-lich-post-facebook",
+    "cat": "Thực chiến",
+    "img": "chatgpt-vs-ai-agent.png",
+    "title": "Hermes lên lịch đăng Facebook: chủ DN có 1 tháng content chỉ trong 1 tiếng",
+    "ex": "Thay vì mỗi tối nghĩ bài đăng, chủ spa giao Hermes soạn và hẹn giờ. 30 bài/tháng xong trong 1 tiếng.",
+    "intro": "Đăng bài đều đặn là việc nhỏ nhưng dễ bỏ quên. Chủ spa giao Hermes lo từ A-Z."
+  },
+  {
+    "slug": "roi-hay-hermes",
+    "cat": "Khái niệm",
+    "img": "ai-agent-la-gi.png",
+    "title": "Thuê người hay dùng Hermes? So sánh chi phí thật cho chủ DN",
+    "ex": "Thuê 1 nhân viên part-time 5tr/tháng hay dùng Hermes miễn phí? Bảng so sánh số liệu thực tế.",
+    "intro": "Nhiều chủ DN đắn đo: thuê người hay dùng AI. Bài này so sánh thẳng số tiền, không lý thuyết."
+  }
+]
