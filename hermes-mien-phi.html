@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dùng Hermes Agent miễn phí — không hết token, chạy trên máy bạn</title>
+<meta name="description" content="Hướng dẫn dùng Hermes Agent miễn phí: tạo ảnh qua FAL, chat tiếng Việt, tự động hóa mà không tốn token LLM.">
+<link rel="canonical" href="https://vanthuonghi.github.io/ai-agent-hermes-vn/hermes-mien-phi.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dùng Hermes Agent miễn phí — không hết token, chạy trên máy bạn">
+<meta property="og:description" content="Hướng dẫn dùng Hermes Agent miễn phí: tạo ảnh qua FAL, chat tiếng Việt, tự động hóa mà không tốn token LLM.">
+<meta property="og:url" content="https://vanthuonghi.github.io/ai-agent-hermes-vn/hermes-mien-phi.html">
+<meta property="og:image" content="https://vanthuonghi.github.io/ai-agent-hermes-vn/assets/img/cover.jpg">
+<meta property="og:locale" content="vi_VN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dùng Hermes Agent miễn phí — không hết token, chạy trên máy bạn">
+<meta name="twitter:description" content="Hướng dẫn dùng Hermes Agent miễn phí: tạo ảnh qua FAL, chat tiếng Việt, tự động hóa mà không tốn token LLM.">
+<meta name="twitter:image" content="https://vanthuonghi.github.io/ai-agent-hermes-vn/assets/img/cover.jpg">
+<meta name="theme-color" content="#0a0e1a">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"WebSite",
+  "name":"AI Agent Hermes",
+  "url":"https://vanthuonghi.github.io/ai-agent-hermes-vn",
+  "description":"Kênh tiếng Việt đầu tiên dạy chủ doanh nghiệp nhỏ tự động hóa bằng AI Agent — tâm điểm Hermes Agent. Không dạy code, dạy tự động hóa để tiết kiệm tiền & tăng doanh thu.",
+  "inLanguage":"vi-VN",
+  "sameAs":["https://www.youtube.com/@AI_Agent_Hermes"]
+}
+</script>
+<style>
+:root{--bg:#0a0e1a;--surface:#121829;--surface2:#1a2238;--border:rgba(255,255,255,.08);
+--ink:#e8ecf5;--muted:#8b95ad;--dim:#5a647e;--accent:#f59e0b;--accent2:#22d3ee;--green:#34d399}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);line-height:1.7;padding:0}
+header{border-bottom:1px solid var(--border);padding:18px 20px;position:sticky;top:0;background:rgba(10,14,26,.9);backdrop-filter:blur(8px);z-index:10}
+.wrap{max-width:760px;margin:0 auto;padding:32px 20px 64px}
+nav a{color:var(--accent);text-decoration:none;font-weight:600;margin-right:18px;font-size:14px}
+h1{font-size:32px;font-weight:800;letter-spacing:-.02em;margin:8px 0 16px;line-height:1.25}
+h2{font-size:22px;font-weight:700;margin:34px 0 12px;border-left:3px solid var(--accent);padding-left:12px}
+h3{font-size:17px;font-weight:600;margin:20px 0 8px;color:var(--accent2)}
+p{color:var(--muted);margin:10px 0}
+.lead{font-size:18px;color:var(--ink);margin-bottom:24px}
+ul,ol{padding-left:22px;margin:10px 0} li{margin:8px 0;color:var(--muted)} li b{color:var(--ink)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin:16px 0}
+.pill{display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:13px;color:var(--muted);margin:4px 4px 0 0}
+.pill.a{color:var(--accent);border-color:rgba(245,158,11,.3)}
+.cta{background:linear-gradient(135deg,#f59e0b,#f97316);color:#0a0e1a;font-weight:800;padding:14px 22px;border-radius:12px;display:inline-block;text-decoration:none;margin:18px 0}
+blockquote{border-left:3px solid var(--accent2);padding:8px 16px;margin:16px 0;color:var(--ink);background:var(--surface)}
+footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--border);color:var(--dim);font-size:13px}
+.meta{color:var(--dim);font-size:13px;margin-bottom:20px}
+</style>
+</head>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"Article",
+  "headline":"Dùng Hermes Agent miễn phí — không hết token, chạy trên máy bạn","description":"Hướng dẫn dùng Hermes Agent miễn phí: tạo ảnh qua FAL, chat tiếng Việt, tự động hóa mà không tốn token LLM.","inLanguage":"vi-VN",
+  "datePublished":"2026-07-27","dateModified":"2026-07-27",
+  "author":{"@type":"Person","name":"Văn Hỉ"},
+  "publisher":{"@type":"Organization","name":"AI Agent Hermes","url":"https://vanthuonghi.github.io/ai-agent-hermes-vn"},
+  "mainEntityOfPage":{"@type":"WebPage","@id":"https://vanthuonghi.github.io/ai-agent-hermes-vn/hermes-mien-phi.html"}
+}
+</script>
+<body>
+<header><nav><a href="index.html">🏠 Trang chủ</a><a href="ai-agent-la-gi.html">AI Agent là gì</a><a href="tu-dong-hoa-sme.html">Tự động hóa SME</a><a href="hermes-mien-phi.html">Hermes miễn phí</a></nav></header>
+<div class="wrap">
+<p class="meta">Đăng 2026-07-27 · 5 phút đọc · Chuyên mục: Hermes Agent</p>
+<h1>Dùng Hermes Agent miễn phí — tại sao không hết token?</h1>
+<p class="lead">Nhiều người sợ "dùng AI tốn tiền token". Với Hermes, tạo ảnh chạy qua FAL (tính riêng theo ảnh, có free tier) — <b>không qua LLM token của bạn</b>. Đây là cách nó hoạt động liên tục mà không tốn.</p>
+
+<h2>1. Tại sao tạo ảnh miễn phí?</h2>
+<p>Công cụ <code>image_generate</code> route qua <b>FAL.ai (FLUX)</b>. FAL tính tiền <b>riêng theo ảnh</b>, có gói free. → Tạo thumbnail cho kênh YouTube = <b>không hết token chat</b>.</p>
+
+<h2>2. Prompt chuẩn để ảnh không bị rác</h2>
+<p>Ảnh AI hay bị vỡ chữ. Hermes dùng template: ghi rõ "NO text artifacts, NO clutter", giới hạn chữ ≤4 từ, đặt tên màu hex chính xác. Kết quả: sạch, high-contrast, đúng ý.</p>
+<blockquote>Ví dụ: "Bold yellow text 'TÌM & TÓM TẮT' on dark navy, NO clutter, NO garbled letters" → ảnh thumbnail chuẩn.</blockquote>
+
+<h2>3. Tự chạy trên máy bạn</h2>
+<ul><li>Chat tiếng Việt, giao việc tự nhiên.</li><li>Lên lịch (cron) tự báo cáo mỗi tối.</li><li>Quản lý file, trình duyệt, code — đều local.</li></ul>
+
+<h2>4. Lưu ý thực tế</h2>
+<p>FAL free có giới hạn lượt/ngày (đủ vài ảnh/ngày cho kênh). Muốn vô hạn: tự host FLUX (cần GPU) hoặc thuê VPS. Với SME, free tier là đủ.</p>
+
+<a class="cta" href="https://www.youtube.com/@AI_Agent_Hermes">▶ Xem video thực chiến trên YouTube</a>
+<footer>AI Agent Hermes · Chuỗi "AI Agent Thực Chiến" · Cập nhật 2026-07-27 · Email: vanthuonghi@gmail.com</footer>
+</div>
+</body></html>
