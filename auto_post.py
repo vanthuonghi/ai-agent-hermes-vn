@@ -96,14 +96,14 @@ def gen_faq(topic):
 def rebuild_blog_index():
     """Rebuild blog index from all <slug>.html posts (single source of truth)."""
     posts = []
-    for fn in os.listdir(BASE):
+    for fn in sorted(os.listdir(BASE)):
         if fn.endswith(".html") and fn not in ("index.html","blog-template.html") and fn != "google806c304e629f0445.html":
             p = os.path.join(BASE, fn)
             t = open(p, encoding="utf-8").read()
             m_title = re.search(r'<title>([^<]*)</title>', t)
-            m_cat = re.search(r'<p class="meta">([^·]*?)·', t)
             m_ex = re.search(r'<p class="ex">([^<]*)</p>', t)
             m_img = re.search(r'assets/img/([\w-]+\.png)', t)
+            m_cat = re.search(r'<p class="meta">([^·]*?)·', t)
             m_date = re.search(r'<p class="meta">[^·]*·\s*([\d/]+)', t)
             if m_title and m_ex:
                 posts.append({
@@ -111,8 +111,8 @@ def rebuild_blog_index():
                     "title": m_title.group(1),
                     "ex": m_ex.group(1),
                     "img": m_img.group(1) if m_img else "cover.png",
-                    "cat": m_cat.group(1).strip() if m_cat else "Blog",
-                    "date": m_date.group(1) if m_date else "27/07/2026",
+                    "cat": (m_cat.group(1).strip() if m_cat else "Blog"),
+                    "date": (m_date.group(1) if m_date else "27/07/2026"),
                 })
     cards = ""
     for p in posts:
@@ -124,9 +124,12 @@ def rebuild_blog_index():
 '''
     bp = os.path.join(BASE, "blog", "index.html")
     b = open(bp, encoding="utf-8").read()
-    b = re.sub(r'(<div class="wrap-wide" style="padding-top:24px">.*?<p class="sub">.*?</p>)',
-               r'\1\n'+cards, b, count=1, flags=re.S)
-    open(bp,"w",encoding="utf-8").write(b)
+    # Replace from first <div class="post"> to last </div> before <footer>
+    # Strategy: keep header (everything before first post card) + insert all cards + footer
+    head = b.split('<div class="post">', 1)[0]
+    foot = b.split('</footer>', 1)[1] if '</footer>' in b else ''
+    new_b = head + cards + f'\n</div>\n<footer>{foot}' if False else head + cards + '\n</div>\n<footer>' + foot
+    open(bp,"w",encoding="utf-8").write(new_b)
     return len(posts)
 
 def main():
