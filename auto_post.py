@@ -101,7 +101,9 @@ def rebuild_blog_index():
             p = os.path.join(BASE, fn)
             t = open(p, encoding="utf-8").read()
             m_title = re.search(r'<title>([^<]*)</title>', t)
-            m_ex = re.search(r'<p class="ex">([^<]*)</p>', t)
+            m_ex = re.search(r'<p class="lead">([^<]*)</p>', t)
+            if not m_ex:
+                m_ex = re.search(r'<p class="ex">([^<]*)</p>', t)
             m_img = re.search(r'assets/img/([\w-]+\.png)', t)
             m_cat = re.search(r'<p class="meta">([^·]*?)·', t)
             m_date = re.search(r'<p class="meta">[^·]*·\s*([\d/]+)', t)
