@@ -93,46 +93,6 @@ def gen_faq(topic):
 </script>'''
     return faq_html, faq_schema
 
-def rebuild_blog_index():
-    """Rebuild blog index from all <slug>.html posts (single source of truth)."""
-    posts = []
-    for fn in sorted(os.listdir(BASE)):
-        if fn.endswith(".html") and fn not in ("index.html","blog-template.html") and fn != "google806c304e629f0445.html":
-            p = os.path.join(BASE, fn)
-            t = open(p, encoding="utf-8").read()
-            m_title = re.search(r'<title>([^<]*)</title>', t)
-            m_ex = re.search(r'<p class="lead">([^<]*)</p>', t)
-            if not m_ex:
-                m_ex = re.search(r'<p class="ex">([^<]*)</p>', t)
-            m_img = re.search(r'assets/img/([\w-]+\.png)', t)
-            m_cat = re.search(r'<p class="meta">([^·]*?)·', t)
-            m_date = re.search(r'<p class="meta">[^·]*·\s*([\d/]+)', t)
-            if m_title and m_ex:
-                posts.append({
-                    "slug": fn[:-5],
-                    "title": m_title.group(1),
-                    "ex": m_ex.group(1),
-                    "img": m_img.group(1) if m_img else "cover.png",
-                    "cat": (m_cat.group(1).strip() if m_cat else "Blog"),
-                    "date": (m_date.group(1) if m_date else "27/07/2026"),
-                })
-    cards = ""
-    for p in posts:
-        cards += f'''<div class="post"><div class="thumb"><img src="{SITE}/assets/img/{p['img']}" alt="{p['slug']}" style="width:120px;height:90px;border-radius:10px;object-fit:cover"></div><div class="body">
-<span class="cat">{p['cat']}</span>
-<h3><a href="../{p['slug']}.html" style="color:var(--ink);text-decoration:none">{p['title']}</a></h3>
-<p class="ex">{p['ex']}</p>
-<span class="meta">{p['date']}</span></div></div>
-'''
-    bp = os.path.join(BASE, "blog", "index.html")
-    b = open(bp, encoding="utf-8").read()
-    # Replace from first <div class="post"> to last </div> before <footer>
-    # Strategy: keep header (everything before first post card) + insert all cards + footer
-    head = b.split('<div class="post">', 1)[0]
-    foot = b.split('</footer>', 1)[1] if '</footer>' in b else ''
-    new_b = head + cards + f'\n</div>\n<footer>{foot}' if False else head + cards + '\n</div>\n<footer>' + foot
-    open(bp,"w",encoding="utf-8").write(new_b)
-    return len(posts)
 
 def main():
     q = load_queue()
@@ -160,7 +120,7 @@ def main():
     if os.path.exists(os.path.join(ASSETS, img)):
         page = page.replace('</h1>', f'</h1>\n<img src="{SITE}/assets/img/{img}" alt="{slug}" style="width:100%;max-width:680px;border-radius:14px;margin:20px 0" loading="lazy">')
         open(os.path.join(BASE, f"{slug}.html"),"w",encoding="utf-8").write(page)
-    n = rebuild_blog_index()
+    n = rebuild_all.rebuild_blog(collect_posts())
     # sitemap
     sm = open(os.path.join(BASE,"sitemap.xml"),encoding="utf-8").read()
     if slug not in sm:
