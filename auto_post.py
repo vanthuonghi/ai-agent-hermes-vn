@@ -1,76 +1,90 @@
 # -*- coding: utf-8 -*-
 """Auto blog poster — chuẩn bài 'Hermes tự động hóa CSKH spa'.
-Chạy mỗi 8h sáng VN. Lấy chủ đề từ queue, viết bài theo template chuẩn,
-tạo thumbnail FAL (nếu có net), rebuild blog index, commit+push."""
-import os, re, json, subprocess, datetime, sys
+Chạy mỗi 8h sáng VN. Ưu tiên lấy chủ đề từ file research sáng 7h30
+(~/Desktop/Nới Rộng Hiểu Biết AI/YYYY-MM-DD.html), fallback vào queue cũ.
+Viết bài theo template chuẩn, rebuild blog index, commit+push."""
+import os, re, json, subprocess, datetime, sys, html
 
 BASE = "/Users/vanhi/ai-agent-hermes-vn"
+sys.path.insert(0, BASE)
+import rebuild_all
+from rebuild_all import collect_posts
 SITE = "https://vanthuonghi.github.io/ai-agent-hermes-vn"
 QUEUE = os.path.join(BASE, "blog_queue.json")
 ASSETS = os.path.join(BASE, "assets", "img")
+RESEARCH_DIR = "/Users/vanhi/Desktop/Nới Rộng Hiểu Biết AI"
 TPL = open(os.path.join(BASE, "blog-template.html"), encoding="utf-8").read()
 
+def slugify(s):
+    s = re.sub(r'[^\w\s-]', '', s.lower()).strip().replace(' ', '-')
+    return s[:50] or "bai-moi"
+
+def load_topics_from_research():
+    """Đọc file research sáng nay, trích tiêu đề các tin → chủ đề blog."""
+    today = datetime.date.today().strftime("%Y-%m-%d")
+    fp = os.path.join(RESEARCH_DIR, f"{today}.html")
+    if not os.path.exists(fp):
+        return []
+    t = open(fp, encoding="utf-8").read()
+    # tiêu đề nằm trong <h3><a ...>Tiêu đề</a></h3> hoặc <h3>Tiêu đề</h3>
+    titles = re.findall(r'<h3[^>]*>.*?<a[^>]*>(.*?)</a>.*?</h3>', t, re.S)
+    if not titles:
+        titles = re.findall(r'<h3>(.*?)</h3>', t, re.S)
+    topics = []
+    for ti in titles:
+        ti = re.sub(r'<[^>]+>', '', ti).strip()
+        ti = html.unescape(ti)
+        if not ti or len(ti) < 10:
+            continue
+        slug = slugify(ti)
+        # tránh trùng slug đã có
+        if os.path.exists(os.path.join(BASE, f"{slug}.html")):
+            slug = slug + "-" + today[-2:]
+        topics.append({
+            "slug": slug,
+            "cat": "AI Trend",
+            "img": "ai-agent-la-gi.png",
+            "title": ti,
+            "ex": f"Tổng hợp từ tin AI ngày {today}: {ti}. Hermes chọn lọc để anh và chủ DN cùng học.",
+            "intro": f"Hôm nay ({today}) có một thông tin đáng chú ý trong thế giới AI: {ti}. Dưới đây là góc nhìn thực tế cho chủ DN Việt.",
+        })
+    return topics
+
 def load_queue():
+    """Fallback: nếu không có research, dùng queue cũ."""
     if not os.path.exists(QUEUE):
-        # seed queue with SME topics (chuẩn giọng bài spa)
-        seed = [
-            {"slug":"hermes-quan-ly-file-may","cat":"Thực chiến","img":"hermes-mien-phi.png",
-             "title":"Hermes dọn dẹp file máy: thực tế chủ shop tiết kiệm 2 tiếng/tuần",
-             "ex":"Chủ shop online mở máy thấy đầy folder lộn xộn. Giao Hermes dọn, gom, backup — 2 tiếng/tuần lấy lại.",
-             "intro":"Một chủ shop 3 kho hàng có hàng ngàn file ảnh sản phẩm rải rác. Anh ấy giao Hermes dọn dẹp. Dưới đây là kết quả đo được sau 1 tuần."},
-            {"slug":"hermes-tong-hop-bao-cao","cat":"Thực chiến","img":"tu-dong-hoa-sme.png",
-             "title":"Hermes tổng hợp báo cáo: chủ DN đọc 1 dòng biết tuần làm ăn sao",
-             "ex":"Thay vì lật từng file Excel, chủ DN giao Hermes tổng hợp doanh thu, chi phí thành 1 báo cáo sáng.",
-             "intro":"Chủ tiệm uống cà phê sáng nào cũng lo không biết tuần qua lãi lỗ thế nào. Hermes thay đổi điều đó."},
-            {"slug":"hermes-cham-soc-khach-zalo","cat":"Thực chiến","img":"hermes-tu-dong-hoa-cskh-spa.png",
-             "title":"Hermes chăm sóc khách Zalo: không sót tin nhắn, không mất khách",
-             "ex":"Chủ clinic giao Hermes trả tin nhắn Zalo ngoài giờ. Khách không bỏ ngỏ, tỷ lệ chốt tăng.",
-             "intro":"Một chủ phòng khám da liễu nhận 50 tin nhắn/ngày, bận là quên. Cô ấy để Hermes lo phần đầu."},
-            {"slug":"hermes-len-lich-post-facebook","cat":"Thực chiến","img":"chatgpt-vs-ai-agent.png",
-             "title":"Hermes lên lịch đăng Facebook: chủ DN có 1 tháng content chỉ trong 1 tiếng",
-             "ex":"Thay vì mỗi tối nghĩ bài đăng, chủ spa giao Hermes soạn và hẹn giờ. 30 bài/tháng xong trong 1 tiếng.",
-             "intro":"Đăng bài đều đặn là việc nhỏ nhưng dễ bỏ quên. Chủ spa giao Hermes lo từ A-Z."},
-            {"slug":"roi-hay-hermes","cat":"Khái niệm","img":"ai-agent-la-gi.png",
-             "title":"Thuê người hay dùng Hermes? So sánh chi phí thật cho chủ DN",
-             "ex":"Thuê 1 nhân viên part-time 5tr/tháng hay dùng Hermes miễn phí? Bảng so sánh số liệu thực tế.",
-             "intro":"Nhiều chủ DN đắn đo: thuê người hay dùng AI. Bài này so sánh thẳng số tiền, không lý thuyết."},
-        ]
-        json.dump(seed, open(QUEUE,"w"), ensure_ascii=False, indent=2)
+        return []
     return json.load(open(QUEUE))
 
 def save_queue(q):
-    json.dump(q, open(QUEUE,"w"), ensure_ascii=False, indent=2)
+    json.dump(q, open(QUEUE, "w"), ensure_ascii=False, indent=2)
 
 def gen_body(topic):
     """Build body following CSKH spa structure:
-    hook intro -> 5-6 H2 days/sections -> evidence box with numbers -> table before/after -> note -> FAQ.
-    Uses placeholder structure; real content filled by LLM in production, here templated."""
+    hook intro -> 5-6 H2 days/sections -> evidence box with numbers -> table before/after -> note -> FAQ."""
     slug, cat, title, ex, intro = topic["slug"], topic["cat"], topic["title"], topic["ex"], topic["intro"]
     body = f'''
-<h2>Thực tế tuần đầu</h2>
-<p>{ex} Dưới đây là cách Hermes vận hành và số liệu đo được.</p>
+<h2>Thông tin là gì</h2>
+<p>{ex} Đây là tin được Hermes tổng hợp từ research sáng nay, chọn lọc vì liên quan trực tiếp đến chủ DN Việt.</p>
 
-<h2>Ngày 1–2: Thiết lập</h2>
-<p>Chủ DN giao Hermes nhiệm vụ cụ thể bằng tiếng Việt. Không cần cài đặt phức tạp, không cần code. Hermes ghi nhớ thói quen và bắt đầu làm.</p>
+<h2>Tại sao chủ DN nên quan tâm</h2>
+<p>AI không còn là chuyện xa xỉ. Mỗi cập nhật mô hình, mỗi công cụ agent mới ra đời đều là cơ hội để chủ spa, shop, BĐS, trung tâm đào tạo tiết kiệm thời gian và chi phí. Bỏ qua xu hướng nghĩa là tụt lại so với đối thủ biết dùng.</p>
 
-<h2>Ngày 3–4: Vận hành</h2>
-<p>Hermes tự chạy nền. Sáng có báo cáo, tối có tổng kết. Chủ DN chỉ duyệt việc nhạy cảm, còn lại để agent lo.</p>
+<h2>Áp dụng thực tế thế nào</h2>
+<p>Không cần đợi công nghệ hoàn thiện. Chủ DN có thể bắt đầu bằng Hermes — agent chạy trên máy, miễn phí, giao việc bằng tiếng Việt. Tin trên là minh chứng thêm: AI đang rẻ đi và dễ tiếp cận hơn mỗi ngày.</p>
 
-<h2>Ngày 5–6: Tối ưu</h2>
-<p>Sau vài ngày, Hermes học được quy trình riêng của chủ DN. Làm nhanh hơn, sát ý hơn. Tiết kiệm thời gian rõ rệt.</p>
-
-<div class="evidence"><b>Số liệu thực tế:</b>
+<div class="evidence"><b>Góc nhìn thực tế:</b>
 <ul>
-<li>Thời gian tay chạm: giảm 60-80% so với thủ công</li>
-<li>Chi phí: 0 đồng (Hermes miễn phí, chạy trên máy)</li>
-<li>Lỗi sót: thấp vì tự động, không quên</li>
+<li>Tin được chọn từ research sáng {datetime.date.today().strftime('%d/%m/%Y')}</li>
+<li>Không cần biết code để áp dụng AI vào vận hành</li>
+<li>Hermes miễn phí, chạy local, data an toàn</li>
 </ul></div>
 
-<h2>So sánh trước/sau</h2>
-<table><tr><th></th><th>Trước (thủ công)</th><th>Sau (Hermes)</th></tr>
-<tr><td>Thời gian/tuần</td><td>5-10 tiếng</td><td>1-2 tiếng</td></tr>
-<tr><td>Chi phí</td><td>5-7 triệu thuê người</td><td>0 (miễn phí)</td></tr>
-<tr><td>Rủi ro sót việc</td><td>Cao (bận quên)</td><td>Thấp (tự chạy)</td></tr></table>
+<h2>So sánh: biết vs không biết</h2>
+<table><tr><th></th><th>Chủ DN không cập nhật</th><th>Chủ DN theo kịp trend</th></tr>
+<tr><td>Công cụ</td><td>Làm tay, thuê người</td><td>Dùng agent tự động</td></tr>
+<tr><td>Chi phí</td><td>5-10 triệu/tháng</td><td>0 (Hermes miễn phí)</td></tr>
+<tr><td>Tốc độ</td><td>Chậm, hay quên</td><td>Nhanh, 24/7</td></tr></table>
 
 <h2>Lưu ý cho chủ DN</h2>
 <p>Hermes làm được vì chạy trên máy bạn, kết nối được tài khoản. Nhưng cần thiết lập đúng quyền, và bạn vẫn duyệt nội dung nhạy cảm. Tự động hóa không thay thế sự chăm sóc thật — nó gánh phần lặp lại để bạn có thời gian cho khách.</p>
@@ -95,11 +109,19 @@ def gen_faq(topic):
 
 
 def main():
-    q = load_queue()
-    if not q:
-        print("Queue empty — nothing to post today."); return
-    topic = q.pop(0)
-    save_queue(q)
+    # Ưu tiên 1: chủ đề từ file research sáng 7h30
+    topics = load_topics_from_research()
+    # Ưu tiên 2: fallback queue cũ nếu research trống
+    if not topics:
+        q = load_queue()
+        if not q:
+            print("No research file and queue empty — nothing to post today."); return
+        topics = [q.pop(0)]
+        save_queue(q)
+        qleft = len(q)
+    else:
+        qleft = len(topics)
+    topic = topics[0]
     slug, cat, title, ex, intro = topic["slug"], topic["cat"], topic["title"], topic["ex"], topic["intro"]
     date = datetime.date.today().isoformat()
     date_human = datetime.date.today().strftime("%d/%m/%Y")
@@ -130,7 +152,8 @@ def main():
     subprocess.run(["git","-C",BASE,"add","-A"], check=True)
     subprocess.run(["git","-C",BASE,"commit","-q","-m",f"auto: blog {slug}"], check=True)
     subprocess.run(["git","-C",BASE,"push","origin","main"], check=True)
-    print(f"✅ Posted: {slug} | blog now has {n} posts | queue left: {len(q)}")
+    src = "research" if len(load_topics_from_research())>0 else "queue"
+    print(f"✅ Posted: {slug} | source: {src} | blog now has {n} posts")
 
 if __name__ == "__main__":
     main()
